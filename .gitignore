@@ -1,0 +1,38 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Virtual Environment
+venv/
+.venv/
+ENV/
+
+# Environment Variables (IMPORTANT: contains DB passwords, SMTP creds)
+.env
+.env.local
+.env.production
+
+# IDE / Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# OS
+desktop.ini
+
+# Logs
+*.log
+
+# Archives
+*.zip
+*.tar.gz
+*.rar
+
+# Workspace files
+*.code-workspace

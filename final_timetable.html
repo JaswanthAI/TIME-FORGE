@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>University — Your Finalized Timetable</title>
+    <style>
+        :root {
+            --bg: #05050a;
+            --card-bg: rgba(16, 18, 35, 0.7);
+            --border: rgba(255, 255, 255, 0.08);
+            --purple: #8b5cf6;
+            --blue: #3b82f6;
+            --accent: #f472b6;
+            --white: #f8fafc;
+            --muted: #94a3b8;
+            --row-bg: rgba(255, 255, 255, 0.02);
+            --success: #10b981;
+        }
+
+        [data-theme="light"] {
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --border: rgba(0, 0, 0, 0.06);
+            --purple: #6366f1;
+            --blue: #2563eb;
+            --accent: #db2777;
+            --white: #0f172a;
+            --muted: #64748b;
+            --row-bg: #f1f5f9;
+            --success: #059669;
+        }
+
+        @media print {
+            body { background: white !important; color: black !important; padding: 0 !important; }
+            .no-print { display: none !important; }
+            .container { max-width: 100% !important; margin: 0 !important; }
+            .timetable-card { border: 1px solid #ddd !important; box-shadow: none !important; background: white !important; margin: 0 !important; border-radius: 0 !important; }
+            th, td { border: 1px solid #eee !important; color: black !important; padding: 10px 5px !important; }
+            .slot-filled { background: #fdfdfd !important; border-left: 4px solid #6366f1 !important; }
+            .college-info h1 { -webkit-text-fill-color: black !important; color: black !important; }
+            .watermark { opacity: 0.05 !important; }
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            background: var(--bg);
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(99, 102, 241, 0.05) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(219, 39, 119, 0.05) 0%, transparent 40%);
+            background-attachment: fixed;
+            font-family: 'Outfit', 'Segoe UI', sans-serif;
+            color: var(--white);
+            padding: 50px 20px;
+            line-height: 1.5;
+            transition: background 0.3s ease;
+        }
+
+        .container { max-width: 1200px; margin: 0 auto; position: relative; }
+
+        .watermark {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-30deg);
+            font-size: 120px;
+            font-weight: 900;
+            color: var(--purple);
+            opacity: 0.03;
+            pointer-events: none;
+            user-select: none;
+            white-space: nowrap;
+            z-index: -1;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-bottom: 40px;
+            padding-bottom: 30px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .college-info h1 {
+            font-size: 28px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            background: linear-gradient(135deg, var(--blue), var(--purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 8px;
+        }
+
+        .doc-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 15px;
+        }
+
+        .student-info { text-align: right; }
+        .student-info h2 { font-size: 22px; font-weight: 700; margin-bottom: 4px; color: var(--white); }
+        .student-info p { color: var(--muted); font-size: 14px; font-weight: 500; }
+
+        .theme-toggle {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            color: var(--white);
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            margin-right: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .theme-toggle:hover { 
+            border-color: var(--purple); 
+            color: var(--purple); 
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+        }
+
+        .timetable-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(15px);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.12);
+            animation: slideUp 0.6s ease-out;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+        }
+
+        th, td {
+            padding: 20px 15px;
+            border: 1px solid var(--border);
+            text-align: center;
+        }
+
+        th {
+            background: rgba(99, 102, 241, 0.04);
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: var(--blue);
+        }
+
+        .td-period { 
+            width: 110px; 
+            font-weight: 700; 
+            background: rgba(0,0,0,0.02); 
+            border-right: 2px solid var(--border);
+        }
+        .p-num { display: block; font-size: 15px; color: var(--purple); margin-bottom: 2px; }
+        .p-time { display: block; font-size: 10px; color: var(--muted); font-weight: 500; }
+
+        .slot-filled {
+            background: rgba(99, 102, 241, 0.03);
+            border-left: 4px solid var(--purple);
+            text-align: left;
+            padding: 12px 15px;
+            transition: background 0.2s;
+        }
+        .slot-filled:hover { background: rgba(99, 102, 241, 0.06); }
+
+        .slot-subj { font-weight: 700; font-size: 14px; color: var(--white); margin-bottom: 4px; line-height: 1.2; }
+        .slot-fac { font-size: 11px; color: var(--blue); display: block; font-weight: 600; }
+        .slot-code { font-size: 10px; color: var(--muted); letter-spacing: 0.5px; font-family: 'Inter', sans-serif; }
+
+        .td-break {
+            background: rgba(0,0,0,0.03);
+            color: var(--muted);
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+        }
+
+        .actions {
+            margin-top: 40px;
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+        }
+
+        .btn {
+            padding: 14px 40px;
+            border-radius: 14px;
+            font-weight: 700;
+            font-size: 15px;
+            cursor: pointer;
+            border: none;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+        }
+
+        .btn-print { 
+            background: linear-gradient(135deg, var(--purple), var(--blue)); 
+            color: white; 
+            box-shadow: 0 10px 25px rgba(99, 102, 241, 0.3);
+        }
+        .btn-print:hover { 
+            transform: translateY(-3px); 
+            box-shadow: 0 15px 35px rgba(99, 102, 241, 0.4); 
+            filter: brightness(1.1);
+        }
+        .btn-print i { font-size: 18px; }
+
+        #loading { text-align: center; padding: 150px; color: var(--muted); font-weight: 500; letter-spacing: 1px; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="watermark">University OFFICIAL</div>
+        <div id="loading">GENERATING OFFICIAL SCHEDULE...</div>
+        
+        <div id="content" style="display: none;">
+            <div class="header">
+                <div class="college-info">
+                    <div class="doc-badge"><i data-lucide="check-circle"></i> Verified Official Document</div>
+                    <h1>University SLOT SELECTION PORTAL</h1>
+                    <p style="font-size: 13px; color: var(--muted); letter-spacing: 2px; font-weight: 600;">ACADEMIC YEAR 2025-26 • SEMESTER II</p>
+                </div>
+                <div style="display: flex; align-items: center;">
+                    <button class="theme-toggle no-print" onclick="toggleTheme()" title="Toggle Theme">
+                        <i data-lucide="sun" id="themeIcon"></i>
+                    </button>
+                    <div class="student-info">
+                        <h2 id="studentName">Student Name</h2>
+                        <p id="studentID">Reg No: 00000000</p>
+                        <p id="studentEmail">email@University.edu</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="timetable-card">
+                <table>
+                    <thead>
+                        <tr id="theadRow">
+                            <th class="td-period">Period</th>
+                            <th>Monday</th>
+                            <th>Tuesday</th>
+                            <th>Wednesday</th>
+                            <th>Thursday</th>
+                            <th>Friday</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbody">
+                        <!-- Rows generated here -->
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="actions no-print">
+                <button class="btn btn-print" onclick="window.print()">
+                    <i data-lucide="printer"></i> Print / Save as PDF
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        // Theme Logic
+        function initTheme() {
+            const theme = localStorage.getItem('univ-theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', theme);
+            updateThemeIcon(theme);
+        }
+        function toggleTheme() {
+            const current = document.documentElement.getAttribute('data-theme');
+            const next = current === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', next);
+            localStorage.setItem('univ-theme', next);
+            updateThemeIcon(next);
+        }
+        function updateThemeIcon(theme) {
+            const icon = document.getElementById('themeIcon');
+            if (icon) {
+                icon.setAttribute('data-lucide', theme === 'dark' ? 'sun' : 'moon');
+                if (window.lucide) lucide.createIcons();
+            }
+        }
+        
+        // Ensure Lucide icons load correctly
+        window.addEventListener('DOMContentLoaded', () => {
+            initTheme();
+            if (window.lucide) lucide.createIcons();
+        });
+
+        const API = (window.location.origin === "null" || window.location.protocol === "file:") 
+                    ? "http://localhost:8000" 
+                    : window.location.origin;
+        const DAYS = [1, 2, 3, 4, 5];
+        const PERIOD_MAP = [
+            { num: 1, label: 'P1', time: '08:00 - 08:50' },
+            { isBreak: true, label: 'BREAK', time: '08:50 - 09:20' },
+            { num: 2, label: 'P2', time: '09:20 - 10:10' },
+            { num: 3, label: 'P3', time: '10:10 - 11:00' },
+            { num: 4, label: 'P4', time: '11:00 - 11:50' },
+            { isBreak: true, label: 'LUNCH', time: '11:50 - 12:40' },
+            { num: 5, label: 'P5', time: '12:40 - 13:30' },
+            { num: 6, label: 'P6', time: '13:30 - 14:15' },
+            { num: 7, label: 'P7', time: '14:15 - 15:00' }
+        ];
+
+        async function init() {
+            const raw = localStorage.getItem('univ_student');
+            if (!raw) { window.location.href = 'student.html'; return; }
+            const student = JSON.parse(raw);
+
+            document.getElementById('studentName').textContent = student.name;
+            document.getElementById('studentID').textContent = `Reg No: ${student.register_number}`;
+            document.getElementById('studentEmail').textContent = student.email || '';
+
+            try {
+                const res = await fetch(`${API}/api/student/${student.id}/my-timetable`);
+                const data = await res.json();
+                
+                render(data.grid || {});
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('content').style.display = 'block';
+            } catch (err) {
+                console.error(err);
+                alert("Failed to load your timetable. Please try again.");
+            }
+        }
+
+        function render(grid) {
+            const tbody = document.getElementById('tbody');
+            tbody.innerHTML = '';
+
+            PERIOD_MAP.forEach(p => {
+                const tr = document.createElement('tr');
+                
+                // Period Column
+                const tdLabel = document.createElement('td');
+                tdLabel.className = p.isBreak ? 'td-break' : 'td-period';
+                tdLabel.innerHTML = `<span class="p-num">${p.label}</span><span class="p-time">${p.time}</span>`;
+                tr.appendChild(tdLabel);
+
+                if (p.isBreak) {
+                    const tdBrk = document.createElement('td');
+                    tdBrk.colSpan = 5;
+                    tdBrk.className = 'td-break';
+                    tdBrk.textContent = p.label === 'LUNCH' ? 'LUNCH BREAK' : 'INTERMISSION';
+                    tr.appendChild(tdBrk);
+                } else {
+                    DAYS.forEach(day => {
+                        const td = document.createElement('td');
+                        const slot = grid[`${day}_${p.num}`];
+                        if (slot) {
+                            td.className = 'slot-filled';
+                            td.innerHTML = `
+                                <div class="slot-subj">${slot.subject_name || 'Subject'}</div>
+                                <span class="slot-fac">${slot.faculty_name || 'Faculty'}</span>
+                                <div style="display:flex; justify-content:space-between; align-items:center; margin-top:4px;">
+                                    <span class="slot-code">${slot.subject_code || 'CODE'}</span>
+                                    <span style="font-size:9px; color:var(--accent); font-weight:bold;">${slot.block || ''}</span>
+                                </div>
+                            `;
+                        }
+                        tr.appendChild(td);
+                    });
+                }
+                tbody.appendChild(tr);
+            });
+        }
+
+        init();
+    </script>
+</body>
+</html>

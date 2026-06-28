@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Faculty Dashboard | University Slot Selection</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #07070f;
+            --card-bg: rgba(14, 12, 32, 0.94);
+            --primary-gradient: linear-gradient(90deg, #3a5ef5 0%, #9b35d5 55%, #d535b0 100%);
+            --accent-blue: #5b9bd5;
+            --accent-purple: #8b5cf6;
+            --text-main: #d8d8e8;
+            --text-dim: #94a3b8;
+            --border-glow: rgba(120, 80, 240, 0.3);
+            --success: #22c55e;
+            --accent-block: #ff9d46;
+        }
+
+        [data-theme="light"] {
+            --bg-dark: #f8fafc;
+            --card-bg: rgba(255, 255, 255, 0.95);
+            --text-main: #0f172a;
+            --text-dim: #64748b;
+            --border-glow: rgba(99, 102, 241, 0.2);
+            --panel-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        body {
+            background: var(--bg-dark);
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(58, 94, 245, 0.05) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(213, 53, 176, 0.05) 0%, transparent 40%);
+            color: var(--text-main);
+            min-height: 100vh;
+            padding: 2rem;
+            background-attachment: fixed;
+        }
+
+        .block-badge {
+            background: rgba(255, 157, 70, 0.1);
+            color: var(--accent-block);
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 700;
+            border: 1px solid rgba(255, 157, 70, 0.2);
+            margin-left: 10px;
+            vertical-align: middle;
+            text-transform: uppercase;
+        }
+
+        .container {
+            max-width: 1300px;
+            margin: 0 auto;
+        }
+
+        /* HEADER & NAVIGATION */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .logo-box {
+            background: white;
+            padding: 8px 16px;
+            border-radius: 10px;
+            margin-right: 20px;
+            max-width: 200px;
+            min-height: 52px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        .logo-box img {
+            height: auto;
+            max-height: 48px;
+            width: auto;
+            max-width: 100%;
+            object-fit: contain;
+            display: block;
+            margin: 0 auto;
+        }
+
+        .header-content {
+            display: flex;
+            align-items: center;
+        }
+
+        .faculty-info h1 {
+            font-size: 24px;
+            letter-spacing: 1px;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .faculty-info p {
+            color: var(--text-dim);
+            font-size: 14px;
+            margin-top: 4px;
+        }
+
+        .nav-actions {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.1);
+            background: rgba(255,255,255,0.05);
+            color: white;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+        }
+
+        .btn:hover {
+            background: rgba(255,255,255,0.1);
+            transform: translateY(-2px);
+        }
+
+        .btn-primary {
+            background: var(--primary-gradient);
+            border: none;
+        }
+
+        .btn-logout {
+            color: #ef4444;
+        }
+
+        /* ANALYTICS GRID */
+        .analytics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-glow);
+            border-radius: 16px;
+            padding: 1.5rem;
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.4s ease, border-color 0.4s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+            border-color: var(--accent-purple);
+        }
+
+        .stat-card::after {
+            content: '';
+            position: absolute;
+            top: 0; right: 0;
+            width: 80px; height: 80px;
+            background: var(--primary-gradient);
+            filter: blur(50px);
+            opacity: 0.1;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--text-dim);
+            margin-bottom: 8px;
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: white;
+        }
+
+        .stat-meta {
+            margin-top: 10px;
+            font-size: 13px;
+            color: var(--success);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        /* DASHBOARD CONTENT SPLIT */
+        .dashboard-layout {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 2rem;
+        }
+
+        @media (max-width: 1100px) {
+            .dashboard-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* TIMETABLE */
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-title span {
+            color: var(--accent-blue);
+        }
+
+        .timetable-container {
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: 20px;
+            border: 1px solid var(--border-glow);
+            padding: 1rem;
+            overflow-x: auto;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            transition: box-shadow 0.3s ease;
+        }
+
+        .timetable-container:hover {
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4), 0 0 20px rgba(120, 80, 240, 0.15);
+        }
+
+        .timetable {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 8px;
+            min-width: 600px;
+        }
+
+        .timetable th {
+            padding: 12px;
+            font-size: 12px;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-align: center;
+        }
+
+        .timetable td {
+            height: 90px;
+            border-radius: 12px;
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.05);
+            padding: 10px;
+            transition: all 0.2s;
+            cursor: pointer;
+            vertical-align: top;
+        }
+
+        .timetable td:hover {
+            border-color: var(--accent-purple);
+            background: rgba(139, 92, 246, 0.05);
+        }
+
+        .timetable td.active-slot {
+            background: rgba(58, 94, 245, 0.1);
+            border: 1px solid rgba(58, 94, 245, 0.3);
+        }
+
+        .timetable td.selected {
+            border-color: white;
+            background: rgba(255,255,255,0.08);
+            box-shadow: 0 0 15px rgba(255,255,255,0.05);
+        }
+
+        .slot-content {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .slot-subject {
+            font-size: 13px;
+            font-weight: 600;
+            color: white;
+        }
+
+        .slot-time {
+            font-size: 11px;
+            color: var(--text-dim);
+        }
+
+        .slot-count {
+            font-size: 12px;
+            margin-top: auto;
+            color: var(--accent-blue);
+            font-weight: 600;
+        }
+
+        /* STUDENT LIST PANEL */
+        .student-panel {
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: 20px;
+            border: 1px solid var(--border-glow);
+            display: flex;
+            flex-direction: column;
+            max-height: 800px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            transition: box-shadow 0.3s ease;
+        }
+
+        .student-panel:hover {
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4), 0 0 20px rgba(120, 80, 240, 0.15);
+        }
+
+        .panel-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .search-box {
+            position: relative;
+            margin-top: 1rem;
+        }
+
+        .search-box input {
+            width: 100%;
+            background: rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 10px;
+            padding: 12px 16px 12px 40px;
+            color: white;
+            outline: none;
+            font-size: 14px;
+        }
+
+        .search-box i {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-dim);
+        }
+
+        .student-scroll {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1rem;
+        }
+
+        .student-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            border-radius: 10px;
+            margin-bottom: 8px;
+            background: rgba(255,255,255,0.02);
+            border: 1px solid transparent;
+            transition: 0.2s;
+        }
+
+        .student-item:hover {
+            background: rgba(255,255,255,0.05);
+            border-color: rgba(255,255,255,0.1);
+        }
+
+        .student-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: var(--primary-gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: 700;
+            color: white;
+        }
+
+        .student-details {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .student-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: white;
+        }
+
+        .student-reg {
+            font-size: 12px;
+            color: var(--text-dim);
+        }
+
+        .empty-state {
+            padding: 3rem 1rem;
+            text-align: center;
+            color: var(--text-dim);
+            font-style: italic;
+        }
+
+        progress {
+            width: 100%;
+            height: 6px;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 8px;
+        }
+
+        progress::-webkit-progress-bar {
+            background: rgba(255,255,255,0.05);
+        }
+
+        progress::-webkit-progress-value {
+            background: var(--primary-gradient);
+        }
+
+        /* SCROLLBAR */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+    </style>
+    <!-- Lucide Icons for aesthetic -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+
+    <div class="container" id="app">
+        <!-- Header -->
+        <header style="display: flex; justify-content: space-between; align-items: center;">
+            <div class="header-content">
+                <div class="logo-box">
+                    <img src="logo.png" alt="University Logo">
+                </div>
+                <div class="faculty-info">
+                    <h1 id="facultyName">Loading... <span id="blockBadge" class="block-badge" style="display:none">Block ?</span></h1>
+                    <p id="facultyDept">Department of Excellence</p>
+                </div>
+            </div>
+            <div class="nav-actions">
+                <button class="btn" onclick="toggleTheme()" title="Toggle Theme" style="padding: 10px; border-radius: 50%;">
+                    <i data-lucide="sun" id="themeIcon"></i>
+                </button>
+                <button class="btn btn-primary" id="exportBtn">
+                    <i data-lucide="download"></i> Export Student List
+                </button>
+                <button class="btn btn-logout" id="logoutBtn">
+                    <i data-lucide="log-out"></i> Logout
+                </button>
+            </div>
+        </header>
+
+        <!-- Analytics -->
+        <div class="analytics-grid">
+            <div class="stat-card">
+                <div class="stat-label">Total Teaching Slots</div>
+                <div class="stat-value" id="statSlots">-</div>
+                <div class="stat-meta"><i data-lucide="calendar"></i> Weekly Schedule</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Total Enrollments</div>
+                <div class="stat-value" id="statEnrollments">-</div>
+                <div class="stat-meta"><i data-lucide="users"></i> Across all sessions</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Active Batches</div>
+                <div class="stat-value" id="statBatches">-</div>
+                <div class="stat-meta"><i data-lucide="layers"></i> Academic Streams</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Unique Students</div>
+                <div class="stat-value" id="statUnique">-</div>
+                <div class="stat-meta"><i data-lucide="shield-check"></i> Cohort Synchronized</div>
+            </div>
+        </div>
+
+        <!-- Dashboard Body -->
+        <div class="dashboard-layout">
+            <!-- Left: Timetable -->
+            <div class="main-content">
+                <h2 class="section-title"><i data-lucide="calendar"></i> <span>Weekly Teaching Schedule</span></h2>
+                <div class="timetable-container">
+                    <table class="timetable">
+                        <thead>
+                            <tr>
+                                <th>Period</th>
+                                <th>Monday</th>
+                                <th>Tuesday</th>
+                                <th>Wednesday</th>
+                                <th>Thursday</th>
+                                <th>Friday</th>
+                            </tr>
+                        </thead>
+                        <tbody id="timetableBody">
+                            <!-- Populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Right: Student List -->
+            <div class="sidebar">
+                <div class="student-panel">
+                    <div class="panel-header">
+                        <h2 class="section-title"><i data-lucide="list"></i> <span id="listTitle">Enrolled Students</span></h2>
+                        <div class="search-box">
+                            <i data-lucide="search"></i>
+                            <input type="text" id="studentSearch" placeholder="Search by name or register no...">
+                        </div>
+                        <button class="btn btn-primary" id="exportSlotBtn" style="width: 100%; margin-top: 1rem; display: none;">
+                            <i data-lucide="file-spreadsheet"></i> Download Period List
+                        </button>
+                    </div>
+                    <div class="student-scroll" id="studentList">
+                        <div class="empty-state">Select a teaching slot to view students</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API = (window.location.origin === "null" || window.location.protocol === "file:") 
+                    ? 'http://localhost:8000' 
+                    : window.location.origin;
+
+        let dashboardData = null;
+        let selectedSlot = null;
+        let faculty = null;
+
+        // Auth Check
+        window.addEventListener('DOMContentLoaded', () => {
+             faculty = JSON.parse(localStorage.getItem('faculty'));
+            if (!faculty) {
+                window.location.href = 'faculty.html';
+                return;
+            }
+            const nameEl = document.getElementById('facultyName');
+            const deptEl = document.getElementById('facultyDept');
+            if (nameEl && faculty && faculty.name) nameEl.innerText = faculty.name;
+            if (deptEl && faculty && faculty.department) deptEl.innerText = `Department of ${faculty.department}`;
+            
+            initTheme();
+            fetchDashboard();
+            lucide.createIcons();
+        });
+
+        // Theme Management
+        function initTheme() {
+            const theme = localStorage.getItem('univ-theme') || 'dark';
+            document.body.setAttribute('data-theme', theme);
+            updateThemeIcon(theme);
+        }
+
+        function toggleTheme() {
+            const current = document.body.getAttribute('data-theme');
+            const next = current === 'dark' ? 'light' : 'dark';
+            document.body.setAttribute('data-theme', next);
+            localStorage.setItem('univ-theme', next);
+            updateThemeIcon(next);
+        }
+
+        function updateThemeIcon(theme) {
+            const icon = document.getElementById('themeIcon');
+            if (icon) {
+                icon.setAttribute('data-lucide', theme === 'dark' ? 'sun' : 'moon');
+                if (window.lucide) lucide.createIcons();
+            }
+        }
+
+        async function fetchDashboard() {
+            try {
+                const response = await fetch(`${API}/api/faculty/dashboard/${faculty.id}`);
+                const data = await response.json();
+                if (response.ok) {
+                    dashboardData = data;
+                    renderTimetable();
+                    renderStats();
+                }
+            } catch (err) {
+                console.error("Fetch error", err);
+            }
+        }
+
+        function renderStats() {
+            const slotsEl = document.getElementById('statSlots');
+            const enrollEl = document.getElementById('statEnrollments');
+            const batchesEl = document.getElementById('statBatches');
+            const uniqueEl = document.getElementById('statUnique');
+            
+            if (slotsEl && dashboardData.analytics) slotsEl.innerText = dashboardData.analytics.total_slots;
+            if (enrollEl && dashboardData.analytics) enrollEl.innerText = dashboardData.analytics.total_enrollments;
+            if (uniqueEl && dashboardData.analytics) uniqueEl.innerText = dashboardData.analytics.unique_students;
+            
+            // Calculate unique batches
+            const uniqueBatches = new Set(dashboardData.slots.map(s => s.stream_name));
+            if (batchesEl) batchesEl.innerText = uniqueBatches.size;
+
+            if (dashboardData.faculty_block) {
+                const badge = document.getElementById('blockBadge');
+                if (badge) {
+                    badge.innerText = `FPC Block ${dashboardData.faculty_block}`;
+                    badge.style.display = 'inline-block';
+                }
+            }
+        }
+
+        function renderTimetable() {
+            const tbody = document.getElementById('timetableBody');
+            tbody.innerHTML = '';
+
+            const periods = [1, 2, 3, 4, 5, 6, 7, 8];
+            const days = [1, 2, 3, 4, 5];
+
+            periods.forEach(pNum => {
+                const tr = document.createElement('tr');
+                
+                // Period Label Cell
+                const labelCell = document.createElement('td');
+                labelCell.style.textAlign = 'center';
+                labelCell.style.verticalAlign = 'middle';
+                labelCell.style.fontWeight = 'bold';
+                labelCell.innerHTML = `<div class="slot-time">P${pNum}</div>`;
+                tr.appendChild(labelCell);
+
+                days.forEach(day => {
+                    const td = document.createElement('td');
+                    const slot = dashboardData.slots.find(s => s.day_of_week === day && s.period_num === pNum);
+                    
+                    if (slot) {
+                        td.classList.add('active-slot');
+                        td.innerHTML = `
+                            <div class="slot-content">
+                                <div class="slot-subject">${slot.subject_code}</div>
+                                <div style="font-size: 10px; color: var(--accent-purple); font-weight: 700;">${slot.stream_name}</div>
+                                <div class="slot-time">${slot.start_time.substring(0,5)} - ${slot.end_time.substring(0,5)}</div>
+                                <div class="slot-count">${slot.booked}/${slot.max_capacity}</div>
+                                <progress value="${slot.booked}" max="${slot.max_capacity}"></progress>
+                            </div>
+                        `;
+                        td.addEventListener('click', () => selectSlot(slot, td));
+                    }
+                    tr.appendChild(td);
+                });
+                tbody.appendChild(tr);
+            });
+        }
+
+        function selectSlot(slot, element) {
+            // UI Toggle
+            document.querySelectorAll('.timetable td').forEach(td => td.classList.remove('selected'));
+            element.classList.add('selected');
+            
+            selectedSlot = slot;
+            const listTitle = document.getElementById('listTitle');
+            if (listTitle) listTitle.innerText = `${slot.subject_code} List`;
+            const exportSlotBtn = document.getElementById('exportSlotBtn');
+            if (exportSlotBtn) exportSlotBtn.style.display = 'flex';
+            renderStudents();
+        }
+
+        function renderStudents() {
+            const container = document.getElementById('studentList');
+            const query = document.getElementById('studentSearch').value.toLowerCase();
+            
+            if (!selectedSlot) return;
+
+            const students = selectedSlot.students || [];
+            const filtered = students.filter(st => 
+                (st.name || '').toLowerCase().includes(query) || 
+                (st.register_number || '').toLowerCase().includes(query)
+            );
+
+            if (filtered.length === 0) {
+                container.innerHTML = `<div class="empty-state">${query ? 'No matching students' : 'No students enrolled yet'}</div>`;
+                return;
+            }
+
+            container.innerHTML = filtered.map(s => `
+                <div class="student-item">
+                    <div class="student-avatar">${(s.name || 'S').charAt(0)}</div>
+                    <div class="student-details">
+                        <div class="student-name">${s.name || 'Unknown Student'}</div>
+                        <div class="student-reg">${s.register_number || 'N/A'} • ${s.department || ''}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Search Input
+        document.getElementById('studentSearch').addEventListener('input', renderStudents);
+
+        // Export
+        document.getElementById('exportBtn').addEventListener('click', async () => {
+            const btn = document.getElementById('exportBtn');
+            btn.innerHTML = '<i data-lucide="loader-2" class="animate-spin"></i> Generating...';
+            lucide.createIcons();
+            
+            window.location.href = `${API}/api/faculty/export/students?faculty_id=${faculty.id}`;
+            
+            setTimeout(() => {
+                btn.innerHTML = '<i data-lucide="download"></i> Export Student List';
+                lucide.createIcons();
+            }, 2000);
+        });
+
+        // Period Specific Export
+        document.getElementById('exportSlotBtn').addEventListener('click', () => {
+            if (!selectedSlot) return;
+            window.location.href = `${API}/api/faculty/export/slot/${selectedSlot.slot_id}`;
+        });
+
+        // Logout
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+            localStorage.removeItem('faculty');
+            window.location.href = 'faculty.html';
+        });
+
+    </script>
+</body>
+</html>

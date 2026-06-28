@@ -1,0 +1,1307 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>University — Faculty Slot Selection</title>
+  <style>
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+      --break-bg: rgba(12, 12, 30, 0.6);
+    }
+
+    [data-theme="light"] {
+      --bg: #f8fafc;
+      --grid-line: rgba(0, 0, 0, 0.05);
+      --card-bg: #ffffff;
+      --card-border: #e2e8f0;
+      --purple: #7c3aed;
+      --purple-lite: #8b5cf6;
+      --blue: #2563eb;
+      --blue-lite: #3b82f6;
+      --white: #0f172a;
+      --muted: #475569;
+      --period-bg: #ffffff;
+      --selected: rgba(124, 58, 237, 0.1);
+      --selected-border: #7c3aed;
+      --break-bg: #f1f5f9;
+    }
+
+    body {
+      min-height: 100vh;
+      background: var(--bg);
+      background-image:
+        linear-gradient(var(--grid-line) 1px, transparent 1px),
+        linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+      background-size: 48px 48px;
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      color: var(--white);
+      padding: 0 0 60px;
+    }
+
+    /* ── Top Bar ── */
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 28px;
+      background: rgba(7, 7, 18, 0.88);
+      border-bottom: 1px solid var(--card-border);
+      backdrop-filter: blur(10px);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .topbar-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .topbar-logo {
+      background: #fff;
+      border-radius: 7px;
+      padding: 4px 12px;
+      margin-left: 10px;
+      max-width: 160px;
+      min-height: 52px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .topbar-logo img {
+      height: auto;
+      max-height: 48px;
+      width: auto;
+      max-width: 100%;
+      object-fit: contain;
+      display: block;
+      margin: 0 auto;
+    }
+
+    .portal-label {
+      font-size: 11px;
+      letter-spacing: 4px;
+      color: var(--blue);
+      font-weight: 700;
+    }
+
+    .portal-title-bar {
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: 3px;
+      line-height: 1.2;
+    }
+
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .theme-toggle {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      color: var(--white);
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    .theme-toggle:hover { border-color: var(--purple); color: var(--purple); }
+
+    .student-badge {
+      background: rgba(30, 20, 60, 0.8);
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 6px 14px;
+      font-size: 13px;
+    }
+
+    .student-badge span {
+      color: var(--blue-lite);
+      font-weight: 700;
+    }
+
+    .btn {
+      border: none;
+      cursor: pointer;
+      border-radius: 7px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      font-size: 11px;
+      padding: 9px 18px;
+      transition: all .2s;
+      text-transform: uppercase;
+    }
+
+    .btn-outline {
+      background: transparent;
+      border: 1px solid var(--card-border);
+      color: var(--muted);
+    }
+
+    .btn-outline:hover {
+      border-color: var(--purple-lite);
+      color: var(--white);
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--purple) 0%, var(--pink) 100%);
+      color: #fff;
+      box-shadow: 0 0 18px rgba(198, 83, 216, 0.35);
+    }
+
+    .btn-primary:hover {
+      box-shadow: 0 0 28px rgba(198, 83, 216, 0.55);
+      transform: translateY(-1px);
+    }
+
+    .btn-primary:disabled {
+      opacity: .45;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .btn-export {
+      background: linear-gradient(135deg, #1a5e2e 0%, var(--green) 100%);
+      color: #fff;
+      box-shadow: 0 0 14px rgba(34, 201, 138, 0.3);
+    }
+
+    .btn-export:hover {
+      box-shadow: 0 0 22px rgba(34, 201, 138, 0.5);
+      transform: translateY(-1px);
+    }
+
+    /* ── Page Body ── */
+    .page-body {
+      max-width: 1380px;
+      margin: 0 auto;
+      padding: 28px 20px 0;
+    }
+
+    /* ── Controls Row ── */
+    .controls {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      align-items: flex-end;
+      margin-bottom: 24px;
+    }
+
+    .ctrl-group {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .ctrl-label {
+      font-size: 10px;
+      letter-spacing: 3px;
+      font-weight: 700;
+      color: var(--blue);
+      text-transform: uppercase;
+    }
+
+    select {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      color: var(--white);
+      border-radius: 7px;
+      padding: 9px 14px;
+      font-size: 13px;
+      outline: none;
+      min-width: 200px;
+      transition: border-color .2s;
+    }
+
+    select:focus {
+      border-color: var(--purple-lite);
+    }
+
+    select option {
+      background: #1a1230;
+    }
+
+    /* ── Summary Bar ── */
+    .summary-bar {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 22px;
+    }
+
+    .summary-chip {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 20px;
+      padding: 6px 16px;
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .summary-chip .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+
+    .dot-selected {
+      background: var(--purple-lite);
+    }
+
+    .dot-full {
+      background: var(--red);
+    }
+
+    .dot-avail {
+      background: var(--green);
+    }
+
+    .dot-break {
+      background: var(--muted);
+    }
+
+    .summary-chip strong {
+      color: var(--white);
+    }
+
+    /* ── Validation Banner ── */
+
+
+
+
+    /* ── Timetable Grid ── */
+    .grid-wrap {
+      overflow-x: auto;
+    }
+
+    .timetable {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 4px;
+      min-width: 820px;
+    }
+
+    /* Header row */
+    .timetable th {
+      font-size: 10px;
+      letter-spacing: 3px;
+      font-weight: 700;
+      color: var(--blue);
+      padding: 10px 6px;
+      text-align: center;
+      background: rgba(10, 8, 28, 0.7);
+      border-radius: 5px;
+      white-space: nowrap;
+    }
+
+    .th-period {
+      min-width: 90px;
+      color: var(--muted) !important;
+    }
+
+    /* Period label cell */
+    .td-period {
+      background: rgba(12, 10, 28, 0.8);
+      border: 1px solid var(--card-border);
+      border-radius: 6px;
+      padding: 8px 10px;
+      text-align: center;
+      white-space: nowrap;
+    }
+
+    .td-period .p-label {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--blue-lite);
+      letter-spacing: 1px;
+    }
+
+    .td-period .p-time {
+      font-size: 10px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    /* Break cell */
+    .td-break {
+      background: var(--break-bg);
+      border: 1px solid rgba(30, 40, 80, 0.4);
+      border-radius: 6px;
+      text-align: center;
+      font-size: 10px;
+      color: var(--muted);
+      letter-spacing: 2px;
+      padding: 6px;
+    }
+
+    /* Slot cell */
+    .slot-cell {
+      background: var(--period-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 6px;
+      padding: 0;
+      vertical-align: top;
+      min-width: 130px;
+      transition: all .18s;
+    }
+
+    .slot-cell.empty {
+      background: rgba(10, 8, 28, 0.4);
+      border-color: rgba(30, 40, 80, 0.3);
+    }
+
+    .slot-card {
+      padding: 8px 9px;
+      cursor: pointer;
+      height: 100%;
+      border-radius: 5px;
+      transition: all .18s;
+      min-height: 80px;
+      position: relative;
+    }
+
+    .slot-card:hover:not(.is-full):not(.is-submitted) {
+      background: rgba(107, 63, 160, 0.18);
+      border-color: var(--purple-lite);
+    }
+
+    .slot-card.selected {
+      background: var(--selected);
+      border: 1px solid var(--selected-border);
+      box-shadow: 0 0 16px rgba(155, 111, 212, 0.3);
+    }
+
+    .slot-card.is-full {
+      cursor: not-allowed;
+      opacity: .55;
+    }
+
+    .slot-card.is-submitted {
+      cursor: default;
+    }
+
+    .slot-subj {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--blue-lite);
+      letter-spacing: .5px;
+      margin-bottom: 2px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .slot-fac {
+      font-size: 10px;
+      color: var(--muted);
+      margin-bottom: 5px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .slot-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .seat-badge {
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      border-radius: 10px;
+      padding: 2px 7px;
+    }
+
+    .seat-ok {
+      background: rgba(34, 201, 138, 0.18);
+      color: var(--green);
+    }
+
+    .seat-low {
+      background: rgba(240, 185, 64, 0.2);
+      color: var(--yellow);
+    }
+
+    .seat-full {
+      background: rgba(224, 80, 80, 0.2);
+      color: var(--red);
+    }
+
+    .sel-icon {
+      font-size: 13px;
+    }
+
+    /* Multi-slot in one cell */
+    .slot-multi {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      height: 100%;
+    }
+
+    .slot-multi .slot-card {
+      min-height: 60px;
+    }
+
+    /* ── Period-week counter sidebar ── */
+    .pw-table {
+      margin-top: 28px;
+    }
+
+    .pw-title {
+      font-size: 11px;
+      letter-spacing: 3px;
+      color: var(--blue);
+      font-weight: 700;
+      margin-bottom: 12px;
+      text-transform: uppercase;
+    }
+
+    .pw-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 8px;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 10px 16px;
+    }
+
+    .pw-subj {
+      font-size: 12px;
+      font-weight: 700;
+      min-width: 80px;
+      color: var(--white);
+    }
+
+    .pw-name {
+      font-size: 11px;
+      color: var(--muted);
+      flex: 1;
+    }
+
+    .pw-bar-wrap {
+      width: 140px;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 3px;
+    }
+
+    .pw-bar {
+      height: 6px;
+      border-radius: 3px;
+      background: linear-gradient(90deg, var(--purple), var(--pink));
+      transition: width .3s;
+    }
+
+    .pw-count {
+      font-size: 12px;
+      font-weight: 700;
+      min-width: 50px;
+      text-align: right;
+    }
+
+    .pw-ok {
+      color: var(--green);
+    }
+
+    .pw-warn {
+      color: var(--yellow);
+    }
+
+    .pw-err {
+      color: var(--red);
+    }
+
+    /* ── Toast ── */
+    #toast {
+      position: fixed;
+      bottom: 28px;
+      left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: rgba(18, 16, 42, 0.96);
+      border: 1px solid var(--card-border);
+      border-radius: 10px;
+      padding: 12px 24px;
+      font-size: 13px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, .5);
+      transition: transform .3s;
+      z-index: 200;
+      white-space: nowrap;
+    }
+
+    #toast.show {
+      transform: translateX(-50%) translateY(0);
+    }
+
+    #toast.t-ok {
+      border-color: var(--green);
+      color: var(--green);
+    }
+
+    #toast.t-err {
+      border-color: var(--red);
+      color: var(--red);
+    }
+
+    #toast.t-info {
+      border-color: var(--blue);
+      color: var(--blue-lite);
+    }
+
+    /* ── Spinner overlay ── */
+    .spinner-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(7, 7, 15, 0.7);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 999;
+    }
+
+    .spinner-overlay.active {
+      display: flex;
+    }
+
+    .spinner {
+      width: 46px;
+      height: 46px;
+      border: 3px solid rgba(107, 63, 160, 0.3);
+      border-top-color: var(--purple-lite);
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    /* ── Submit modal ── */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(7, 7, 15, 0.82);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 998;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    .modal {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 14px;
+      padding: 32px;
+      max-width: 440px;
+      width: 90%;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, .6);
+    }
+
+    .modal h2 {
+      font-size: 16px;
+      letter-spacing: 2px;
+      margin-bottom: 8px;
+    }
+
+    .modal p {
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 20px;
+      line-height: 1.6;
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 12px;
+      justify-content: flex-end;
+    }
+
+    @media (max-width: 700px) {
+      .topbar {
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+
+      .controls {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Spinner -->
+  <div class="spinner-overlay" id="spinnerOverlay">
+    <div class="spinner"></div>
+  </div>
+
+  <!-- Toast -->
+  <div id="toast"></div>
+
+  <!-- Submit confirmation modal -->
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal">
+      <h2>⚠ CONFIRM SUBMISSION</h2>
+      <p>Once submitted, your slot selection is <strong>locked permanently</strong> and cannot be changed. Please review
+        all selections before confirming.</p>
+      <div class="modal-actions">
+        <button class="btn btn-outline" onclick="closeModal()">CANCEL</button>
+        <button class="btn btn-primary" onclick="confirmSubmit()">CONFIRM & LOCK</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Top Bar -->
+  <div class="topbar">
+    <div class="topbar-left">
+      <div>
+        <div class="portal-title-bar">STUDENT PORTAL</div>
+        <div class="portal-label">— SLOT SELECTION SYSTEM —</div>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <button class="theme-toggle" onclick="toggleTheme()" title="Toggle Theme">
+        <i data-lucide="sun" id="themeIcon"></i>
+      </button>
+      <div class="student-badge">
+        Logged in as <span id="studentNameDisplay">—</span>
+      </div>
+      <button class="btn btn-outline" style="border-color: var(--red); color: var(--red);" onclick="deselectAll()">✖ DESELECT ALL</button>
+      <button class="btn btn-export" onclick="exportXLS()">⬇ EXPORT XLS</button>
+      <button class="btn btn-primary" id="submitBtn" onclick="openModal()" disabled>SUBMIT SELECTION</button>
+      <button class="btn btn-outline" id="changeFacultyBtn" onclick="window.location.href='faculty_selection.html'">⚙ CHANGE FACULTY</button>
+      <button class="btn btn-outline" onclick="logout()">LOGOUT</button>
+      <div class="topbar-logo">
+        <img src="logo.png" alt="University" />
+      </div>
+    </div>
+  </div>
+
+  <!-- Main -->
+  <div class="page-body">
+
+    <!-- Controls -->
+    <div class="controls">
+      <div class="ctrl-group">
+        <div class="ctrl-label">Filter by Subject</div>
+        <select id="filterSubject" onchange="applyFilters()">
+          <option value="">All Subjects</option>
+        </select>
+      </div>
+    </div>
+
+
+
+    <!-- Summary chips -->
+    <div class="summary-bar" id="summaryBar">
+      <div class="summary-chip">
+        <div class="dot dot-selected"></div> Selected: <strong id="cntSelected">0</strong>
+      </div>
+      <div class="summary-chip">
+        <div class="dot dot-avail"></div> Available slots shown: <strong id="cntAvail">0</strong>
+      </div>
+      <div class="summary-chip">
+        <div class="dot dot-full"></div> Full slots: <strong id="cntFull">0</strong>
+      </div>
+    </div>
+
+    <!-- Timetable -->
+    <div class="grid-wrap">
+      <table class="timetable" id="timetable">
+        <thead id="timetableHead"></thead>
+        <tbody id="timetableBody"></tbody>
+      </table>
+    </div>
+
+    <!-- Periods/week counter -->
+    <div class="pw-table" id="pwTable">
+      <div class="pw-title">Periods per Week · Constraint Status</div>
+      <div id="pwRows"></div>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>
+    // Theme Logic
+    function initTheme() {
+      const theme = localStorage.getItem('univ-theme') || 'dark';
+      document.body.setAttribute('data-theme', theme);
+      updateThemeIcon(theme);
+    }
+    function toggleTheme() {
+      const current = document.body.getAttribute('data-theme');
+      const next = current === 'dark' ? 'light' : 'dark';
+      document.body.setAttribute('data-theme', next);
+      localStorage.setItem('univ-theme', next);
+      updateThemeIcon(next);
+    }
+    function updateThemeIcon(theme) {
+      const icon = document.getElementById('themeIcon');
+      if (icon) {
+        icon.setAttribute('data-lucide', theme === 'dark' ? 'sun' : 'moon');
+        if (window.lucide) lucide.createIcons();
+      }
+    }
+    initTheme();
+
+    // ============================================================
+    // Config
+    // ============================================================
+    const API = (window.location.origin === "null" || window.location.protocol === "file:") 
+                ? "http://localhost:8000" 
+                : window.location.origin;
+
+    const DAYS = [
+      { num: 1, name: 'MONDAY' },
+      { num: 2, name: 'TUESDAY' },
+      { num: 3, name: 'WEDNESDAY' },
+      { num: 4, name: 'THURSDAY' },
+      { num: 5, name: 'FRIDAY' },
+    ];
+
+    const PERIODS = [
+      { num: 1, label: 'P1', start: '08:00', end: '08:50' },
+      null, // break 08:50-09:20
+      { num: 2, label: 'P2', start: '09:20', end: '10:10' },
+      { num: 3, label: 'P3', start: '10:10', end: '11:00' },
+      { num: 4, label: 'P4', start: '11:00', end: '11:50' },
+      null, // break 11:50-12:40
+      { num: 5, label: 'P5', start: '12:40', end: '13:30' },
+      { num: 6, label: 'P6', start: '13:30', end: '14:15' },
+      { num: 7, label: 'P7', start: '14:15', end: '15:00' },
+    ];
+
+    const BREAK_ROWS = [
+      { label: 'BREAK', time: '08:50 – 09:20' },
+      { label: 'LUNCH BREAK', time: '11:50 – 12:40' },
+    ];
+
+    // ============================================================
+    // State
+    // ============================================================
+    let student = null;
+    let allSlots = [];
+    let constraints = [];
+    let isSubmitted = false;
+    let ws = null;
+
+    // ============================================================
+    // Real-time Updates (WebSockets)
+    // ============================================================
+    function initWebSocket() {
+      if (ws) return;
+      const wsUrl = API.replace('http', 'ws') + '/ws/updates';
+      ws = new WebSocket(wsUrl);
+
+      ws.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
+          if (data.type === 'capacity_update') {
+            updateLiveCapacities(data.slots);
+          }
+        } catch (e) { console.error("WS Parse Error", e); }
+      };
+
+      ws.onclose = () => {
+        ws = null;
+        console.log("WS Lost. Reconnecting...");
+        setTimeout(initWebSocket, 3000);
+      };
+    }
+
+    function updateLiveCapacities(updates) {
+      let changed = false;
+      updates.forEach(u => {
+        const s = allSlots.find(x => x.slot_id === u.slot_id);
+        if (s) {
+          // Sync live data
+          s.remaining = u.remaining;
+          s.is_full = u.is_full;
+          changed = true;
+        }
+      });
+      if (changed) {
+        renderTable(); 
+        // We don't spin() here to keep it subtle
+      }
+    }
+
+    // ============================================================
+    // Init
+    // ============================================================
+    window.addEventListener('DOMContentLoaded', async () => {
+      const raw = sessionStorage.getItem('univ_student') || localStorage.getItem('univ_student');
+      if (!raw) { window.location.href = 'student.html'; return; }
+      student = JSON.parse(raw);
+      document.getElementById('studentNameDisplay').textContent =
+        `${student.register_number} · ${student.name}`;
+      await loadTimetable();
+      initWebSocket();
+    });
+
+    // ============================================================
+    // Fetch timetable
+    // ============================================================
+    async function loadTimetable() {
+      spin(true);
+      try {
+        const res = await fetch(`${API}/api/timetable?student_id=${student.id}`);
+        const data = await res.json();
+        allSlots = data.slots || [];
+        constraints = data.constraints || [];
+        isSubmitted = data.is_submitted;
+        if (isSubmitted) {
+          window.location.href = 'final_timetable.html';
+          return;
+        }
+
+        populateFilters();
+        renderTable();
+        renderPWBar();
+        updateSubmitBtn();
+      } catch (e) {
+        toast('⚠ Failed to load timetable. Is the server running?', 'err');
+      } finally {
+        spin(false);
+      }
+    }
+
+    // ============================================================
+    // Filter dropdowns
+    // ============================================================
+    function populateFilters() {
+      const subjSel = document.getElementById('filterSubject');
+      const subjects = [...new Map(allSlots.map(s => [s.subject_id, s])).values()];
+
+      subjSel.innerHTML = '<option value="">All Subjects</option>' +
+        subjects.map(s => `<option value="${s.subject_id}">${s.subject_code} – ${s.subject_name}</option>`).join('');
+    }
+
+    function applyFilters() { renderTable(); }
+
+    function getFilteredSlots() {
+      const subj = document.getElementById('filterSubject').value;
+      return allSlots.filter(s =>
+        (!subj || s.subject_id === subj)
+      );
+    }
+
+    // ============================================================
+    // Render timetable
+    // ============================================================
+    function renderTable() {
+      const slots = getFilteredSlots();
+      const head = document.getElementById('timetableHead');
+      const body = document.getElementById('timetableBody');
+
+      // Slot map: day → periodNum → [slots]
+      const map = {};
+      DAYS.forEach(d => { map[d.num] = {}; });
+      slots.forEach(s => {
+        if (!map[s.day]) return;
+        if (!map[s.day][s.period_num]) map[s.day][s.period_num] = [];
+        map[s.day][s.period_num].push(s);
+      });
+
+      // Header
+      head.innerHTML = `<tr>
+    <th class="th-period">PERIOD</th>
+    ${DAYS.map(d => `<th>${d.name}</th>`).join('')}
+  </tr>`;
+
+      // Build rows
+      let breakIdx = 0;
+      let rowsHtml = '';
+      PERIODS.forEach((p, i) => {
+        if (p === null) {
+          const brk = BREAK_ROWS[breakIdx++];
+          rowsHtml += `<tr>
+        <td class="td-break">${brk.label}<br><small>${brk.time}</small></td>
+        ${DAYS.map(() => `<td class="td-break">·</td>`).join('')}
+      </tr>`;
+          return;
+        }
+        rowsHtml += `<tr>
+      <td class="td-period">
+        <div class="p-label">${p.label}</div>
+        <div class="p-time">${p.start}–${p.end}</div>
+      </td>
+      ${DAYS.map(d => {
+          const daySlots = (map[d.num] && map[d.num][p.num]) || [];
+          if (daySlots.length === 0) {
+            return `<td class="slot-cell empty"></td>`;
+          }
+          const inner = daySlots.map(s => buildSlotCard(s)).join('');
+          const wrap = daySlots.length > 1
+            ? `<div class="slot-multi">${inner}</div>`
+            : inner;
+          return `<td class="slot-cell">${wrap}</td>`;
+        }).join('')}
+    </tr>`;
+      });
+      body.innerHTML = rowsHtml;
+
+      updateSummaryChips(slots);
+    }
+
+    function buildSlotCard(s) {
+      const remaining = s.remaining;
+      let seatClass = 'seat-ok';
+      let seatLabel = `${remaining} SEATS`;
+      if (remaining <= 0) { seatClass = 'seat-full'; seatLabel = 'FULL'; }
+      else if (remaining <= 10) { seatClass = 'seat-low'; }
+
+      const cls = [
+        'slot-card',
+        s.is_selected ? 'selected' : '',
+        s.is_full ? 'is-full' : '',
+        isSubmitted ? 'is-submitted' : '',
+      ].filter(Boolean).join(' ');
+
+      const icon = s.is_selected ? '✓' : '';
+
+      return `<div class="${cls}"
+    id="slot-${s.slot_id}"
+    data-section="${s.section_id}"
+    onclick="toggleSlot('${s.slot_id}', ${s.is_selected}, ${s.is_full})"
+    onmouseover="highlightSection('${s.section_id}')"
+    onmouseout="unhighlightSection()"
+    title="${s.subject_name} · ${s.faculty_name} · ${remaining} seats remaining">
+    <div class="slot-subj">${s.subject_code}</div>
+    <div class="slot-fac">${s.faculty_name.replace('Dr. ', 'Dr.').replace('Prof. ', 'Prof.')}</div>
+    <div class="slot-footer">
+      <span class="seat-badge ${seatClass}">${seatLabel}</span>
+      <span class="sel-icon">${icon}</span>
+    </div>
+  </div>`;
+    }
+
+    function highlightSection(sectionId) {
+      document.querySelectorAll('.slot-card').forEach(el => {
+        if (el.getAttribute('data-section') === sectionId) {
+          el.style.borderColor = 'var(--accent)';
+          el.style.boxShadow = '0 0 12px var(--accent)';
+        } else {
+          el.style.opacity = '0.4';
+        }
+      });
+    }
+
+    function unhighlightSection() {
+      document.querySelectorAll('.slot-card').forEach(el => {
+        el.style.borderColor = '';
+        el.style.boxShadow = '';
+        el.style.opacity = '';
+      });
+    }
+
+    // ============================================================
+    // Summary chips
+    // ============================================================
+    function updateSummaryChips(slots) {
+      document.getElementById('cntSelected').textContent = slots.filter(s => s.is_selected).length;
+      document.getElementById('cntAvail').textContent = slots.filter(s => !s.is_full).length;
+      document.getElementById('cntFull').textContent = slots.filter(s => s.is_full).length;
+    }
+
+    // ============================================================
+    // Periods/week bar
+    // ============================================================
+    function renderPWBar() {
+      if (!constraints.length) { document.getElementById('pwTable').style.display = 'none'; return; }
+      const html = constraints.map(c => {
+        const count = allSlots.filter(s => s.subject_id === c.subject_id && s.is_selected).length;
+        const max = c.max_periods_per_week || 5;
+        const pct = Math.min(100, Math.round(count / max * 100));
+        let cls = count < c.min_periods_per_week ? 'pw-err' : (count === max ? 'pw-ok' : 'pw-warn');
+        return `<div class="pw-row">
+      <div class="pw-subj">${c.subject_code}</div>
+      <div class="pw-name">${c.subject_name}</div>
+      <div class="pw-bar-wrap"><div class="pw-bar" style="width:${pct}%"></div></div>
+      <div class="pw-count ${cls}">${count} / ${max}</div>
+    </div>`;
+      }).join('');
+      document.getElementById('pwRows').innerHTML = html;
+    }
+
+    // ============================================================
+    // Toggle slot
+    // ============================================================
+    async function toggleSlot(slotId, isSelected, isFull) {
+      if (isSubmitted) return;
+      if (isFull && !isSelected) { toast('This slot is full', 'err'); return; }
+
+      // Prevent selecting multiple slots in the same day and period
+      if (!isSelected) {
+        const targetSlot = allSlots.find(x => x.slot_id === slotId);
+        const clash = allSlots.find(s => 
+          s.is_selected && 
+          s.day === targetSlot.day && 
+          s.period_num === targetSlot.period_num
+        );
+        if (clash) {
+          toast('You already have a slot selected in this time period!', 'err');
+          return;
+        }
+
+        // Prevent selecting slots from different faculty for the same subject
+        const facultyClash = allSlots.find(s => 
+          s.is_selected && 
+          s.subject_id === targetSlot.subject_id && 
+          s.faculty_id !== targetSlot.faculty_id
+        );
+        if (facultyClash) {
+          toast(`You have already selected ${targetSlot.subject_code} with ${facultyClash.faculty_name}. Please stick to one faculty per subject.`, 'err');
+          return;
+        }
+
+        // Prevent exceeding max periods per week
+        const constraint = constraints.find(c => c.subject_id === targetSlot.subject_id);
+        if (constraint) {
+          const currentCount = allSlots.filter(s => s.is_selected && s.subject_id === targetSlot.subject_id).length;
+          if (currentCount >= constraint.max_periods_per_week) {
+            toast(`You have already reached the maximum of ${constraint.max_periods_per_week} periods for ${targetSlot.subject_code}.`, 'err');
+            return;
+          }
+        }
+      }
+
+      spin(true);
+      try {
+        const res = await fetch(`${API}/api/select`, {
+          method: isSelected ? 'DELETE' : 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ student_id: student.id, slot_id: slotId })
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          toast(`⚠ ${data.detail || 'Error'}`, 'err');
+        } else {
+          // Update local state for the ENTIRE SECTION
+          const target = allSlots.find(x => x.slot_id === slotId);
+          const sectionId = target.section_id;
+          
+          allSlots.forEach(s => {
+            if (s.section_id === sectionId) {
+              s.is_selected = !isSelected;
+              s.remaining += isSelected ? 1 : -1;
+              s.booked += isSelected ? -1 : 1;
+              s.is_full = s.remaining <= 0;
+            }
+          });
+          
+          renderTable();
+          renderPWBar();
+          updateSubmitBtn();
+          toast(isSelected ? 'Section removed' : '✓ Section selected', isSelected ? 'info' : 'ok');
+        }
+      } catch (e) {
+        toast('Server error', 'err');
+      } finally {
+        spin(false);
+      }
+    }
+
+    // ============================================================
+    // Submit
+    // ============================================================
+    function updateSubmitBtn() {
+      const btn = document.getElementById('submitBtn');
+      const anySelected = allSlots.some(s => s.is_selected);
+      
+      if (isSubmitted) {
+        btn.textContent = 'VIEW FINAL TIMETABLE';
+        btn.disabled = false;
+        btn.onclick = () => { window.location.href = 'final_timetable.html'; };
+        return;
+      }
+      
+      btn.disabled = !anySelected;
+      btn.onclick = openModal;
+    }
+
+    function openModal() {
+      // Validate locally first
+      const errors = validateLocal();
+      if (errors.length) {
+        showBanner('err', errors);
+        return;
+      }
+      document.getElementById('modalOverlay').classList.add('active');
+    }
+    function closeModal() {
+      document.getElementById('modalOverlay').classList.remove('active');
+    }
+
+    async function confirmSubmit() {
+      closeModal();
+      spin(true);
+      try {
+        const res = await fetch(`${API}/api/submit`, {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ student_id: student.id })
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          const errs = data.detail?.errors || [data.detail];
+          showBanner('err', errs);
+          toast('⚠ Submission failed', 'err');
+        } else {
+          isSubmitted = true;
+          allSlots.forEach(s => { if (s.is_selected) s.is_submitted = true; });
+          renderTable();
+          updateSubmitBtn();
+          showBanner('ok', ['✓ Selection submitted and locked successfully!']);
+          toast('✓ Submitted!', 'ok');
+          // Redirect to final view after a short delay
+          setTimeout(() => { window.location.href = 'final_timetable.html'; }, 1500);
+        }
+      } catch (e) {
+        toast('Server error', 'err');
+      } finally {
+        spin(false);
+      }
+    }
+
+    // ============================================================
+    // Local validation
+    // ============================================================
+    function validateLocal() {
+      const errors = [];
+      constraints.forEach(c => {
+        const count = allSlots.filter(s => s.subject_id === c.subject_id && s.is_selected).length;
+        if (count < c.min_periods_per_week)
+          errors.push(`${c.subject_code}: minimum ${c.min_periods_per_week} periods/week required (selected: ${count})`);
+        if (count > c.max_periods_per_week)
+          errors.push(`${c.subject_code}: maximum ${c.max_periods_per_week} periods/week exceeded (selected: ${count})`);
+      });
+      return errors;
+    }
+
+    function showBanner(type, lines) {
+      // Fallback to toast since boxes are removed
+      const msg = lines[0] || (type === 'ok' ? 'Success' : 'Error');
+      toast(type === 'ok' ? `✓ ${msg}` : `⚠ ${msg}`, type === 'ok' ? 'ok' : 'err');
+    }
+
+    // ============================================================
+    // Export XLS
+    // ============================================================
+    async function exportXLS() {
+      spin(true);
+      try {
+        const res = await fetch(`${API}/api/export/selections`);
+        if (!res.ok) { toast('Export failed', 'err'); return; }
+        const blob = await res.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `univ_slot_selections_${new Date().toISOString().slice(0, 10)}.xlsx`;
+        a.click();
+        URL.revokeObjectURL(url);
+        toast('✓ Export downloaded', 'ok');
+      } catch (e) { toast('Export error', 'err'); }
+      finally { spin(false); }
+    }
+
+    // ============================================================
+    // Deselect All
+    // ============================================================
+    async function deselectAll() {
+      if (isSubmitted) return;
+      
+      const count = allSlots.filter(s => s.is_selected).length;
+      if (count === 0) {
+        toast('No slots are currently selected.', 'info');
+        return;
+      }
+      
+      if (!confirm(`Are you sure you want to deselect all ${count} slots?`)) return;
+      
+      spin(true);
+      try {
+        const res = await fetch(`${API}/api/select/all?student_id=${student.id}`, {
+          method: 'DELETE'
+        });
+        const data = await res.json();
+        
+        if (!res.ok) {
+          toast(`⚠ ${data.detail || 'Error clearing selections'}`, 'err');
+        } else {
+          // Reset local state for all selected slots
+          allSlots.forEach(s => {
+            if (s.is_selected) {
+              s.is_selected = false;
+              s.remaining += 1;
+              s.booked -= 1;
+              s.is_full = s.remaining <= 0;
+            }
+          });
+          
+          renderTable();
+          renderPWBar();
+          updateSubmitBtn();
+          toast('✓ All selections cleared', 'ok');
+        }
+      } catch (e) {
+        toast('Server error', 'err');
+      } finally {
+        spin(false);
+      }
+    }
+
+    // ============================================================
+    // Utility
+    // ============================================================
+    function spin(on) {
+      document.getElementById('spinnerOverlay').classList.toggle('active', on);
+    }
+
+    let _toastTimer;
+    function toast(msg, type = 'info') {
+      const el = document.getElementById('toast');
+      el.textContent = msg;
+      el.className = `show t-${type}`;
+      clearTimeout(_toastTimer);
+      _toastTimer = setTimeout(() => { el.className = ''; }, 3200);
+    }
+
+    function logout() {
+      sessionStorage.removeItem('univ_student');
+      localStorage.removeItem('univ_student');
+      window.location.href = 'student.html';
+    }
+  </script>
+</body>
+
+</html>

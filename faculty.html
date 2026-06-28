@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>University Faculty Portal</title>
+  <style>
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --bg: #07070f;
+      --grid: rgba(30, 40, 120, 0.20);
+      --card-bg: rgba(14, 12, 32, 0.94);
+      --card-border: rgba(120, 80, 240, 0.5);
+      --white: #ffffff;
+      --muted: #5b9bd5;
+      --label: #d8d8e8;
+      --input-bg: rgba(8, 6, 22, 0.88);
+      --input-text: #bbb;
+    }
+
+    [data-theme="light"] {
+      --bg: #f8fafc;
+      --grid: rgba(99, 102, 241, 0.05);
+      --card-bg: rgba(255, 255, 255, 0.95);
+      --card-border: rgba(0, 0, 0, 0.05);
+      --white: #0f172a;
+      --muted: #64748b;
+      --label: #475569;
+      --input-bg: #ffffff;
+      --input-text: #0f172a;
+      --panel-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01);
+    }
+
+    body {
+      min-height: 100vh;
+      background: var(--bg);
+      background-image:
+        linear-gradient(var(--grid) 1px, transparent 1px),
+        linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+      background-size: 48px 48px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      padding: 2rem 1rem;
+      transition: background 0.3s;
+    }
+
+    .theme-toggle {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 1000;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      color: var(--white);
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    .theme-toggle:hover { transform: scale(1.05); }
+
+    .logo-wrapper {
+      background: #ffffff;
+      border-radius: 10px;
+      padding: 10px 24px;
+      margin-bottom: 1.6rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      max-width: 320px;
+      min-height: 52px;
+      overflow: hidden;
+    }
+
+    .logo-wrapper img {
+      height: auto;
+      max-height: 48px;
+      width: auto;
+      max-width: 100%;
+      object-fit: contain;
+      display: block;
+      margin: 0 auto;
+    }
+
+    .portal-title {
+      color: var(--white);
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: 4px;
+      text-align: center;
+      margin-bottom: 6px;
+    }
+
+    .portal-subtitle {
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 4px;
+      text-align: center;
+      margin-bottom: 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .portal-subtitle::before,
+    .portal-subtitle::after {
+      content: '';
+      display: inline-block;
+      width: 40px;
+      height: 1px;
+      background: var(--muted);
+    }
+
+    .card {
+      width: 100%;
+      max-width: 468px;
+      background: var(--card-bg);
+      border-radius: 18px;
+      border: 1.5px solid var(--card-border);
+      padding: 2.4rem 2.6rem 2rem;
+      position: relative;
+      overflow: hidden;
+      transition: background 0.3s;
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      inset: -3px;
+      border-radius: 20px;
+      background: linear-gradient(130deg,
+          rgba(130, 70, 255, 0.30) 0%,
+          rgba(30, 10, 80, 0.08) 40%,
+          rgba(200, 60, 230, 0.25) 100%);
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .card>* {
+      position: relative;
+      z-index: 1;
+    }
+
+    .field-label {
+      display: block;
+      color: var(--label);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 2.5px;
+      margin-bottom: 8px;
+    }
+
+    .field-wrap {
+      margin-bottom: 1.5rem;
+    }
+
+    .field-input {
+      width: 100%;
+      background: var(--input-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 9px;
+      color: var(--input-text);
+      font-size: 14px;
+      padding: 14px 16px;
+      outline: none;
+      transition: 0.2s;
+    }
+
+    .field-input::placeholder {
+      color: #484848;
+    }
+
+    .field-input:focus {
+      border-color: rgba(130, 80, 255, 0.75);
+    }
+
+    .login-btn {
+      width: 100%;
+      padding: 15px;
+      border: none;
+      border-radius: 9px;
+      background: linear-gradient(90deg, #3a5ef5 0%, #9b35d5 55%, #d535b0 100%);
+      color: #fff;
+      font-size: 13.5px;
+      font-weight: 800;
+      letter-spacing: 3px;
+      cursor: pointer;
+      margin-top: 0.2rem;
+      margin-bottom: 1.5rem;
+      transition: opacity 0.18s, transform 0.12s;
+    }
+
+    .login-btn:hover {
+      opacity: 0.87;
+    }
+
+    .login-btn:active {
+      opacity: 0.70;
+      transform: scale(0.99);
+    }
+
+    .card-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .forgot-link {
+      color: #4f90d0;
+      font-size: 13px;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    .forgot-link:hover {
+      text-decoration: underline;
+    }
+
+    .status {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      color: #999;
+    }
+
+    .dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: #22c55e;
+      flex-shrink: 0;
+    }
+
+    .site-footer {
+      margin-top: 1.5rem;
+      color: #444;
+      font-size: 12px;
+      letter-spacing: 0.4px;
+      text-align: center;
+    }
+  </style>
+</head>
+
+<body>
+  <button class="theme-toggle" onclick="toggleTheme()" title="Toggle Theme">
+    <i data-lucide="sun" id="themeIcon"></i>
+  </button>
+
+  <div class="logo-wrapper">
+    <img
+      src="logo.png"
+      alt="University Portal" />
+  </div>
+
+  <div class="portal-title">Faculty & Administrator</div>
+  <div class="portal-subtitle">STAFF ACCESS SYSTEM</div>
+
+  <div class="card">
+    <div class="field-wrap">
+      <label class="field-label">FACULTY ID</label>
+      <input class="field-input" id="facultyId" type="text" placeholder="Enter your faculty ID" />
+    </div>
+
+    <div class="field-wrap">
+      <label class="field-label">PASSWORD</label>
+      <input class="field-input" id="password" type="password" placeholder="Enter your password" />
+    </div>
+
+    <button id="loginBtn" class="login-btn">INITIALIZE LOGIN</button>
+
+    <div class="card-footer">
+      <a class="forgot-link" href="#">Forgot Password?</a>
+      <div class="status">
+        <span class="dot"></span>
+        System Online
+      </div>
+    </div>
+  </div>
+
+  <div class="site-footer">Secure Access Portal &bull; University Portal</div>
+
+  <script>
+    const API = window.location.origin === "null" || window.location.protocol === "file:" 
+                ? 'http://localhost:8000' 
+                : window.location.origin;
+
+    const loginBtn = document.getElementById('loginBtn');
+    const facultyIdInput = document.getElementById('facultyId');
+    const passwordInput = document.getElementById('password');
+
+    loginBtn.addEventListener('click', async () => {
+        const employee_id = facultyIdInput.value.trim();
+        const password = passwordInput.value.trim();
+
+        if (!employee_id || !password) {
+            alert('Please enter both Faculty ID and Password');
+            return;
+        }
+
+        loginBtn.disabled = true;
+        loginBtn.innerText = 'AUTHENTICATING...';
+
+        try {
+            const response = await fetch(`${API}/api/faculty/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ employee_id, password })
+            });
+
+            const data = await response.json();
+
+            if (response.ok && data.success) {
+                localStorage.setItem('faculty', JSON.stringify(data.faculty));
+                if (data.faculty.is_admin) {
+                    window.location.href = 'admin_dashboard.html';
+                } else {
+                    window.location.href = 'faculty_dashboard.html';
+                }
+            } else {
+                alert(data.detail || 'Invalid credentials');
+                loginBtn.disabled = false;
+                loginBtn.innerText = 'INITIALIZE LOGIN';
+            }
+        } catch (error) {
+            console.error('Login error:', error);
+            alert('Connection failed. Is the backend running?');
+            loginBtn.disabled = false;
+            loginBtn.innerText = 'INITIALIZE LOGIN';
+        }
+    });
+
+    // Enter key support
+    [facultyIdInput, passwordInput].forEach(input => {
+        input.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') loginBtn.click();
+        });
+    });
+  </script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>
+    function initTheme() {
+      const theme = localStorage.getItem('univ-theme') || 'dark';
+      document.body.setAttribute('data-theme', theme);
+      updateThemeIcon(theme);
+    }
+    function toggleTheme() {
+      const current = document.body.getAttribute('data-theme');
+      const next = current === 'dark' ? 'light' : 'dark';
+      document.body.setAttribute('data-theme', next);
+      localStorage.setItem('univ-theme', next);
+      updateThemeIcon(next);
+    }
+    function updateThemeIcon(theme) {
+      const icon = document.getElementById('themeIcon');
+      if (icon) {
+        icon.setAttribute('data-lucide', theme === 'dark' ? 'sun' : 'moon');
+        if (window.lucide) lucide.createIcons();
+      }
+    }
+    initTheme();
+  </script>
+</body>
+
+</html>

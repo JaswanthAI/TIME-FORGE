@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>University — Faculty Selection Portal</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest"></script>
+<style>
+    :root {
+        --bg: #05050a;
+        --sidebar-bg: rgba(10, 11, 24, 0.95);
+        --card-bg: rgba(20, 22, 45, 0.6);
+        --card-border: rgba(255, 255, 255, 0.08);
+        --accent-purple: #8e5cff;
+        --accent-blue: #4ea5ff;
+        --accent-pink: #f472b6;
+        --text-main: #f8fafc;
+        --text-dim: #94a3b8;
+        --success: #10b981;
+        --danger: #ef4444;
+        --warning: #f59e0b;
+        --top-bar-bg: rgba(8, 10, 22, 0.85);
+    }
+
+    [data-theme="light"] {
+        --bg: #f8fafc;
+        --sidebar-bg: #ffffff;
+        --card-bg: rgba(255, 255, 255, 0.9);
+        --card-border: rgba(0, 0, 0, 0.05);
+        --accent-purple: #6366f1;
+        --accent-blue: #2563eb;
+        --accent-pink: #ec4899;
+        --text-main: #0f172a;
+        --text-dim: #64748b;
+        --top-bar-bg: rgba(255, 255, 255, 0.95);
+        --panel-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+        min-height: 100vh;
+        background: var(--bg);
+        background-image: 
+            radial-gradient(circle at 10% 20%, rgba(142, 92, 255, 0.08) 0%, transparent 40%),
+            radial-gradient(circle at 90% 80%, rgba(78, 165, 255, 0.08) 0%, transparent 40%);
+        font-family: 'Outfit', sans-serif;
+        color: var(--text-main);
+        overflow-x: hidden;
+    }
+
+    /* ── Top Bar ── */
+    .top-bar {
+        background: var(--top-bar-bg);
+        backdrop-filter: blur(20px);
+        border-bottom: 1px solid var(--card-border);
+        padding: 0.8rem 2rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+    }
+
+    .logo-section {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+    }
+
+    .logo-box {
+        background: white;
+        padding: 8px 12px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+        max-width: 180px;
+        min-height: 52px;
+        overflow: hidden;
+    }
+
+    .logo-box img {
+        height: auto;
+        max-height: 48px;
+        width: auto;
+        max-width: 100%;
+        object-fit: contain;
+        display: block;
+        margin: 0 auto;
+    }
+
+    .top-bar h1 {
+        font-size: 1.2rem;
+        font-weight: 800;
+        color: var(--text-main);
+        letter-spacing: 1px;
+    }
+
+    .user-info {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        background: rgba(var(--accent-purple), 0.05);
+        padding: 6px 16px;
+        border-radius: 100px;
+        border: 1px solid var(--card-border);
+    }
+
+    .theme-toggle {
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        color: var(--text-main);
+        width: 40px;
+        height: 40px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+    .theme-toggle:hover { border-color: var(--accent-purple); color: var(--accent-purple); }
+
+    .user-info span { font-size: 0.9rem; font-weight: 600; }
+    #userReg { color: var(--accent-purple); opacity: 0.8; }
+
+    .btn-logout {
+        background: rgba(239, 68, 68, 0.1);
+        border: 1px solid rgba(239, 68, 68, 0.2);
+        color: var(--danger);
+        padding: 6px 16px;
+        border-radius: 100px;
+        cursor: pointer;
+        font-size: 0.85rem;
+        font-weight: 700;
+        transition: 0.3s;
+    }
+    .btn-logout:hover { background: var(--danger); color: white; }
+
+    .container { max-width: 1400px; margin: 0 auto; padding: 2rem; }
+
+    /* ── Progress Section ── */
+    .stats-banner {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .stat-card {
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        padding: 1.5rem;
+        border-radius: 24px;
+        text-align: center;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+
+    .stat-card:hover { transform: translateY(-5px); border-color: var(--accent-purple); box-shadow: 0 10px 25px rgba(0,0,0,0.15); }
+    .stat-val { font-size: 1.8rem; font-weight: 800; color: var(--accent-purple); margin-bottom: 4px; }
+    .stat-lbl { font-size: 0.75rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 2px; font-weight: 700; }
+
+    .progress-container {
+        grid-column: span 2;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        padding: 0 1rem;
+    }
+
+    .progress-bar-bg {
+        height: 12px;
+        background: rgba(255,255,255,0.05);
+        border-radius: 100px;
+        overflow: hidden;
+        border: 1px solid var(--card-border);
+    }
+
+    .progress-bar-fg {
+        height: 100%;
+        background: linear-gradient(90deg, var(--accent-purple), var(--accent-blue));
+        border-radius: 100px;
+        transition: width 1s cubic-bezier(0.34, 1.56, 0.64, 1);
+        box-shadow: 0 0 20px rgba(142, 92, 255, 0.4);
+    }
+
+    /* ── Layout ── */
+    .main-layout {
+        display: grid;
+        grid-template-columns: 360px 1fr;
+        gap: 2rem;
+    }
+
+    @media (max-width: 1100px) { .main-layout { grid-template-columns: 1fr; } }
+
+    /* ── Subject List ── */
+    .subject-list { display: flex; flex-direction: column; gap: 1rem; }
+    
+    .block-group { margin-bottom: 1.5rem; }
+    .block-header {
+        font-size: 0.75rem;
+        font-weight: 800;
+        color: var(--accent-blue);
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .block-header::after { content: ''; flex: 1; height: 1px; background: linear-gradient(to right, var(--card-border), transparent); }
+
+    .subject-card {
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        padding: 1.25rem;
+        border-radius: 18px;
+        cursor: pointer;
+        transition: all 0.3s;
+        margin-bottom: 0.75rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+
+    .subject-card:hover {
+        background: rgba(255,255,255,0.03);
+        border-color: var(--accent-purple);
+        transform: translateX(8px);
+    }
+
+    .subject-card.active {
+        background: linear-gradient(135deg, rgba(142, 92, 255, 0.1), transparent);
+        border-color: var(--accent-purple);
+        box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    }
+
+    .subject-card.selected { border-left: 4px solid var(--success); }
+
+    .sc-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+    .sc-code { font-size: 0.8rem; font-weight: 800; color: var(--accent-purple); letter-spacing: 1px; }
+    .sc-badge {
+        font-size: 0.65rem;
+        font-weight: 800;
+        padding: 4px 10px;
+        border-radius: 100px;
+        text-transform: uppercase;
+    }
+    .badge-theory { background: rgba(142, 92, 255, 0.15); color: var(--accent-purple); }
+    .badge-lab { background: rgba(244, 114, 182, 0.15); color: var(--accent-pink); }
+    .badge-done { background: rgba(16, 185, 129, 0.15); color: var(--success); }
+
+    .sc-name { font-size: 0.95rem; font-weight: 600; color: var(--text-main); margin-bottom: 6px; }
+    .sc-faculty { font-size: 0.75rem; color: var(--accent-blue); font-weight: 500; }
+
+    /* ── Right Panel ── */
+    .right-panel { display: flex; flex-direction: column; gap: 2rem; }
+    .panel-header {
+        font-size: 0.9rem;
+        font-weight: 800;
+        color: var(--text-dim);
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .faculty-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(400px, 1fr)); gap: 1.25rem; }
+    @media (max-width: 600px) { .faculty-grid { grid-template-columns: 1fr; } }
+
+    .fac-card {
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        border-radius: 20px;
+        padding: 1.5rem;
+        transition: all 0.3s;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .fac-card:hover { border-color: var(--accent-purple); box-shadow: 0 15px 35px rgba(0,0,0,0.15); }
+    .fac-card.clash { opacity: 0.6; grayscale: 0.5; }
+    .fac-card.full { opacity: 0.5; }
+
+    .fac-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem; }
+    .fac-name { font-size: 1.1rem; font-weight: 700; color: var(--text-main); }
+    .fac-stream { font-size: 0.7rem; font-weight: 800; color: var(--accent-purple); text-transform: uppercase; margin-top: 4px; }
+
+    .fac-tags { display: flex; gap: 6px; }
+    .tag { font-size: 0.65rem; font-weight: 800; padding: 4px 10px; border-radius: 6px; }
+    .tag-ok { background: rgba(16, 185, 129, 0.1); color: var(--success); }
+    .tag-clash { background: rgba(239, 68, 68, 0.1); color: var(--danger); }
+    .tag-full { background: rgba(245, 158, 11, 0.1); color: var(--warning); }
+
+    .fac-slots { display: flex; flex-wrap: wrap; gap: 6px; margin: 1rem 0; }
+    .slot-pill {
+        font-size: 0.7rem;
+        font-weight: 600;
+        padding: 6px 12px;
+        border-radius: 8px;
+        background: rgba(255,255,255,0.03);
+        border: 1px solid var(--card-border);
+        color: var(--text-dim);
+    }
+    .slot-pill.clash { border-color: var(--danger); color: var(--danger); background: rgba(239, 68, 68, 0.05); }
+
+    .load-indicator { margin-bottom: 1.5rem; }
+    .load-bar-bg { height: 6px; background: rgba(0,0,0,0.3); border-radius: 100px; overflow: hidden; margin-bottom: 6px; }
+    .load-bar-fg { height: 100%; background: var(--accent-blue); border-radius: 100px; transition: 1s; }
+    .load-text { font-size: 0.7rem; font-weight: 700; color: var(--text-dim); text-align: right; }
+
+    .btn-select {
+        width: 100%;
+        background: linear-gradient(135deg, var(--accent-purple), #6d28d9);
+        color: white;
+        border: none;
+        padding: 12px;
+        border-radius: 12px;
+        font-size: 0.85rem;
+        font-weight: 800;
+        cursor: pointer;
+        transition: all 0.3s;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+    }
+
+    .btn-select:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(142, 92, 255, 0.4); }
+    .btn-select:disabled { opacity: 0.3; cursor: not-allowed; }
+    .btn-select.selected { background: var(--success); cursor: default; }
+
+    .btn-remove {
+        background: rgba(239, 68, 68, 0.15);
+        color: var(--danger);
+        border: 1px solid rgba(239, 68, 68, 0.2);
+        margin-top: 8px;
+        width: 100%;
+        padding: 10px;
+        border-radius: 10px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+    .btn-remove:hover { background: var(--danger); color: white; }
+
+    /* ── Timetable Grid ── */
+    .timetable-container {
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        border-radius: 24px;
+        padding: 1.5rem;
+        backdrop-filter: blur(10px);
+    }
+
+    .tt-grid {
+        display: grid;
+        grid-template-columns: 80px repeat(5, 1fr);
+        gap: 8px;
+    }
+
+    .tt-cell {
+        min-height: 60px;
+        padding: 8px;
+        border-radius: 12px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        font-size: 0.7rem;
+        transition: 0.3s;
+    }
+
+    .tt-header { font-weight: 800; color: var(--accent-purple); text-transform: uppercase; letter-spacing: 1px; }
+    .tt-period { background: var(--card-border); color: var(--text-dim); font-weight: 700; opacity: 0.8; }
+    .tt-empty { background: rgba(var(--accent-purple), 0.02); border: 1px dashed var(--card-border); opacity: 0.4; }
+    
+    .tt-filled {
+        background: linear-gradient(135deg, rgba(142, 92, 255, 0.1), rgba(142, 92, 255, 0.05));
+        border: 1px solid rgba(142, 92, 255, 0.2);
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+
+    .tt-lab-filled {
+        background: linear-gradient(135deg, rgba(244, 114, 182, 0.1), rgba(244, 114, 182, 0.05));
+        border: 1px solid rgba(244, 114, 182, 0.2);
+    }
+
+    .tt-sub { font-weight: 800; color: var(--text-main); margin-bottom: 2px; }
+    .tt-fac { font-size: 0.6rem; color: var(--text-dim); }
+
+    .tt-lunch {
+        grid-column: 2 / span 5;
+        background: rgba(245, 158, 11, 0.05);
+        color: var(--warning);
+        font-weight: 800;
+        letter-spacing: 8px;
+        text-transform: uppercase;
+        font-size: 0.8rem;
+    }
+
+    /* ── Submit Section ── */
+    .submit-panel {
+        background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), transparent);
+        border: 1px solid rgba(16, 185, 129, 0.2);
+        padding: 2rem;
+        border-radius: 24px;
+        text-align: center;
+    }
+
+    .btn-submit {
+        background: linear-gradient(135deg, var(--success), #059669);
+        color: white;
+        border: none;
+        padding: 1rem 4rem;
+        border-radius: 16px;
+        font-size: 1.1rem;
+        font-weight: 800;
+        cursor: pointer;
+        transition: all 0.3s;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        box-shadow: 0 10px 30px rgba(16, 185, 129, 0.3);
+    }
+
+    .btn-submit:hover:not(:disabled) { transform: translateY(-3px) scale(1.02); box-shadow: 0 15px 40px rgba(16, 185, 129, 0.5); }
+    .btn-submit:disabled { opacity: 0.2; cursor: not-allowed; grayscale: 1; }
+
+    .empty-state {
+        padding: 4rem;
+        text-align: center;
+        background: var(--card-bg);
+        border-radius: 24px;
+        border: 1px dashed var(--card-border);
+    }
+    .empty-state i { color: var(--accent-purple); opacity: 0.5; margin-bottom: 1rem; }
+    .empty-state p { color: var(--text-dim); font-size: 0.9rem; }
+
+    .submitted-banner {
+        background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(16, 185, 129, 0.05));
+        border: 1px solid var(--success);
+        padding: 1.5rem;
+        border-radius: 20px;
+        margin-bottom: 2rem;
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        animation: fadeIn 0.5s ease-out;
+    }
+
+    .banner-icon { width: 48px; height: 48px; background: var(--success); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white; }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--card-border); border-radius: 10px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--accent-purple); }
+
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+</style>
+</head>
+<body>
+<div class="top-bar">
+  <div class="logo-section">
+      <div class="logo-box">
+          <img src="logo.png" alt="University Logo">
+      </div>
+      <h1>Faculty Selection Portal</h1>
+  </div>
+  <div class="user-info">
+    <button class="theme-toggle" onclick="toggleTheme()" title="Toggle Theme">
+      <i data-lucide="sun" id="themeIcon"></i>
+    </button>
+    <span id="userName">—</span>
+    <span id="userReg">—</span>
+    <button class="btn-logout" onclick="logout()">
+      <i data-lucide="log-out" style="width: 14px; display: inline; vertical-align: middle; margin-right: 4px;"></i> Logout
+    </button>
+  </div>
+</div>
+<div class="container">
+  <div id="submittedBanner" class="submitted-banner" style="display:none">
+    <div class="banner-icon"><i data-lucide="check-circle-2"></i></div>
+    <div>
+        <h2 style="font-size: 1.1rem; color: var(--success); margin-bottom: 4px;">Selection Locked</h2>
+        <p style="font-size: 0.85rem; color: var(--text-dim);">Your faculty choices have been submitted. <a href="final_timetable.html" style="color: var(--accent-blue); font-weight: 700; text-decoration: none;">View Timetable →</a></p>
+    </div>
+  </div>
+  <div class="stats-banner">
+    <div class="stat-card">
+        <div class="stat-val" id="selCount">0/0</div>
+        <div class="stat-lbl">Courses Picked</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-val" id="perCount">0</div>
+        <div class="stat-lbl">Weekly Periods</div>
+    </div>
+    <div class="stat-card progress-container">
+        <div class="progress-bar-bg">
+            <div class="progress-bar-fg" id="progressFill" style="width:0%"></div>
+        </div>
+        <div style="display: flex; justify-content: space-between; margin-top: 8px;">
+            <div class="stat-lbl">Completion Status</div>
+            <div class="stat-lbl" id="targetInfo">0/0</div>
+        </div>
+    </div>
+  </div>
+  <div class="main-layout">
+    <aside class="subject-list" id="subjectList"></aside>
+    <main class="right-panel">
+      <section id="facultyPanel">
+        <div class="empty-state">
+            <i data-lucide="book-open" size="48"></i>
+            <p>Select a course from the left to view available faculty bundles</p>
+        </div>
+      </section>
+      <section class="timetable-section">
+        <div class="panel-header">
+            <i data-lucide="calendar"></i> Live Schedule Preview
+        </div>
+        <div class="timetable-container">
+            <div class="tt-grid" id="ttGrid"></div>
+        </div>
+      </section>
+      <section class="submit-section">
+        <div class="submit-panel">
+            <button class="btn-submit" id="submitBtn" disabled onclick="submitSelection()">Confirm Selection</button>
+            <p style="font-size: 0.75rem; color: var(--text-dim); margin-top: 1rem;">Make sure all courses are selected before final submission.</p>
+        </div>
+      </section>
+    </main>
+  </div>
+</div>
+<script>
+lucide.createIcons();
+const API = (location.origin === "null" || location.protocol === "file:") ? "http://localhost:8000" : location.origin;
+
+// Theme Logic
+function initTheme() {
+  const theme = localStorage.getItem('univ-theme') || 'dark';
+  document.body.setAttribute('data-theme', theme);
+  updateThemeIcon(theme);
+}
+function toggleTheme() {
+  const current = document.body.getAttribute('data-theme');
+  const next = current === 'dark' ? 'light' : 'dark';
+  document.body.setAttribute('data-theme', next);
+  localStorage.setItem('univ-theme', next);
+  updateThemeIcon(next);
+}
+function updateThemeIcon(theme) {
+  const icon = document.getElementById('themeIcon');
+  if (icon) {
+    icon.setAttribute('data-lucide', theme === 'dark' ? 'sun' : 'moon');
+    lucide.createIcons();
+  }
+}
+initTheme();
+
+const student = JSON.parse(localStorage.getItem('univ_student') || 'null');
+if (!student) { location.href = 'student.html'; }
+const DAY_NAMES = ['Monday','Tuesday','Wednesday','Thursday','Friday'];
+const PERIODS = [
+  {num:1,label:'P1',time:'08:00-08:50'},{num:2,label:'P2',time:'09:20-10:10'},
+  {num:3,label:'P3',time:'10:10-11:00'},{num:4,label:'P4',time:'11:00-11:50'},
+  {num:5,label:'P5',time:'12:40-13:30'},{num:6,label:'P6',time:'13:30-14:15'},
+  {num:7,label:'P7',time:'14:15-15:00'},{num:8,label:'P8',time:'15:15-16:00'}
+];
+let subjects = [], activeSubjectId = null, timetableData = {};
+
+document.getElementById('userName').textContent = student?.name || '—';
+document.getElementById('userReg').textContent = student?.register_number || '';
+
+function logout() { localStorage.removeItem('univ_student'); location.href = 'student.html'; }
+
+const BLOCK_NAMES = {
+  1: "Morning Block A (M/W/F)",
+  2: "Morning Block B (M/W/F)",
+  3: "Day Block C (T/Th)",
+  4: "Day Block D (T/Th)",
+  5: "Evening Block E (M/W/F)",
+  6: "Special Block F (T/Th)"
+};
+
+async function loadSubjects() {
+  try {
+    const res = await fetch(`${API}/api/student/${student.id}/subjects`);
+    subjects = await res.json();
+    renderSubjects();
+    await loadTimetable();
+  } catch(e) { console.error('Load subjects error:', e); }
+}
+
+function renderSubjects() {
+  const el = document.getElementById('subjectList');
+  const grouped = subjects.reduce((acc, s) => {
+    const cid = s.cluster_id || 1;
+    if (!acc[cid]) acc[cid] = [];
+    acc[cid].push(s);
+    return acc;
+  }, {});
+
+  el.innerHTML = Object.keys(grouped).sort().map(cid => {
+    const items = grouped[cid].map(s => {
+      const done = !!s.selected_faculty_id;
+      const badge = done ? '<span class="sc-badge badge-done">✓ Selected</span>' : 
+        `<span class="sc-badge badge-${s.subject_type}">${s.subject_type === 'lab' ? '🧪 Lab' : '📘 Theory'}</span>`;
+      return `<div class="subject-card ${activeSubjectId === s.id ? 'active' : ''} ${done ? 'selected' : ''}" 
+        onclick="selectSubject('${s.id}')">
+        <div class="sc-top"><span class="sc-code">${s.code || 'N/A'}</span>${badge}</div>
+        <div class="sc-name">${s.name || 'Unknown Subject'}</div>
+        ${done ? `<div class="sc-faculty">▸ ${s.selected_faculty_name || 'Assigned'}</div>` : ''}
+      </div>`;
+    }).join('');
+
+    return `
+      <div class="block-group">
+        <div class="block-header">${BLOCK_NAMES[cid] || 'Other Subjects'}</div>
+        ${items}
+      </div>
+    `;
+  }).join('');
+}
+
+async function selectSubject(subjectId) {
+  activeSubjectId = subjectId;
+  renderSubjects();
+  const panel = document.getElementById('facultyPanel');
+  panel.innerHTML = '<div class="empty-state"><div class="loading-shimmer" style="height:200px"></div><p>Loading faculty options...</p></div>';
+  try {
+    const res = await fetch(`${API}/api/student/${student.id}/faculty-options/${subjectId}`);
+    const options = await res.json();
+    const sub = subjects.find(s => s.id === subjectId);
+    if (!options.length) {
+      panel.innerHTML = '<div class="empty-state"><i data-lucide="alert-circle"></i><p>No faculty availability seeded yet. Contact administrator.</p></div>';
+      lucide.createIcons();
+      return;
+    }
+    const currentFac = sub?.selected_faculty_id;
+    panel.innerHTML = `<div class="panel-header"><i data-lucide="users"></i> Faculty for ${sub?.code}</div>
+      <div class="faculty-grid">${options.map(o => {
+        const pct = Math.round((o.avg_enrolled / o.avg_capacity) * 100);
+        const isSelected = o.faculty_id === currentFac;
+        const disabled = (o.has_clash || o.is_full) && !isSelected;
+        return `<div class="fac-card ${o.has_clash ? 'clash' : ''} ${o.is_full ? 'full' : ''}">
+          <div class="fac-top">
+            <div>
+              <div class="fac-name">${o.faculty_name || 'Unknown Faculty'}</div>
+              <div class="fac-stream">${o.stream_name || 'N/A'}</div>
+            </div>
+            <div class="fac-tags">
+              ${o.is_full ? '<span class="tag tag-full">FULL</span>' : ''}
+              ${o.has_clash ? '<span class="tag tag-clash">CLASH</span>' : '<span class="tag tag-ok">Available</span>'}
+            </div>
+          </div>
+          <div class="fac-slots">${o.slots.map(sl => 
+            `<span class="slot-pill ${o.clash_details.includes(sl.day_name+' '+sl.period_label)?'clash':''}">${sl.day_name.slice(0,3)} ${sl.period_label}</span>`
+          ).join('')}</div>
+          <div class="load-indicator">
+            <div class="load-bar-bg"><div class="load-bar-fg" style="width:${pct}%"></div></div>
+            <div class="load-text">${o.avg_enrolled} / ${o.avg_capacity} Enrolled</div>
+          </div>
+          ${isSelected ? 
+            `<div>
+              <button class="btn-select selected">✓ Assigned</button>
+              <button class="btn-remove" onclick="deselectSubject('${subjectId}')">Remove Assignment</button>
+            </div>` :
+            `<button class="btn-select" ${disabled?'disabled':''} onclick="chooseFaculty('${subjectId}','${o.faculty_id}','${o.stream_name}')">
+              ${o.is_full ? 'Capacity Full' : (o.has_clash ? 'Schedule Clash' : 'Select Faculty')}
+            </button>`
+          }
+        </div>`;
+      }).join('')}</div>`;
+      lucide.createIcons();
+  } catch(e) { panel.innerHTML = `<div class="empty-state"><i data-lucide="x-circle"></i><p>Error: ${e.message}</p></div>`; lucide.createIcons(); }
+}
+
+async function chooseFaculty(subjectId, facultyId, streamName) {
+  try {
+    const res = await fetch(`${API}/api/student/select-faculty`, {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({student_id: student.id, subject_id: subjectId, faculty_id: facultyId, stream_name: streamName})
+    });
+    const data = await res.json();
+    if (!res.ok) { alert(data.detail || 'Selection failed'); return; }
+    await loadSubjects();
+    selectSubject(subjectId);
+  } catch(e) { alert('Error: ' + e.message); }
+}
+
+async function deselectSubject(subjectId) {
+  try {
+    const res = await fetch(`${API}/api/student/deselect-subject`, {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({student_id: student.id, subject_id: subjectId})
+    });
+    if (!res.ok) { const d = await res.json(); alert(d.detail || 'Failed'); return; }
+    await loadSubjects();
+    selectSubject(subjectId);
+  } catch(e) { alert('Error: ' + e.message); }
+}
+
+async function loadTimetable() {
+  try {
+    const res = await fetch(`${API}/api/student/${student.id}/my-timetable`);
+    const data = await res.json();
+    timetableData = data;
+    document.getElementById('selCount').textContent = `${data.selected_subjects}/${data.total_subjects}`;
+    document.getElementById('perCount').textContent = data.total_periods;
+    document.getElementById('targetInfo').textContent = `${data.total_periods}/${data.target_periods} Credits`;
+    const pct = Math.round((data.total_periods / data.target_periods) * 100);
+    document.getElementById('progressFill').style.width = Math.min(pct, 100) + '%';
+    document.getElementById('submitBtn').disabled = !(data.selected_subjects === data.total_subjects && data.total_periods === data.target_periods);
+    if (data.is_submitted) {
+      document.getElementById('submittedBanner').style.display = 'flex';
+      document.getElementById('submitBtn').disabled = true;
+      document.getElementById('submitBtn').textContent = '✅ SUBMITTED';
+    }
+    renderTimetableGrid(data.grid);
+  } catch(e) { console.error('Timetable error:', e); }
+}
+
+function renderTimetableGrid(grid) {
+  let html = '<div class="tt-cell tt-header"></div>';
+  DAY_NAMES.forEach(d => html += `<div class="tt-cell tt-header">${d.slice(0,3)}</div>`);
+  PERIODS.forEach((p, pi) => {
+    if (pi === 1) { // Break after P1 (8:50-9:20)
+      html += '<div class="tt-cell tt-period">—</div>';
+      html += '<div class="tt-cell tt-lunch" style="letter-spacing: 4px; font-size: 0.7rem; color: var(--accent-blue);">MORNING BREAK (08:50 – 09:20)</div>';
+    }
+    if (pi === 4) { // Lunch after P4 (11:50-12:40)
+      html += '<div class="tt-cell tt-period">—</div>';
+      html += '<div class="tt-cell tt-lunch">LUNCH BREAK</div>';
+    }
+    html += `<div class="tt-cell tt-period">${p.label}<br><span style="font-size:8px;opacity:0.6">${p.time}</span></div>`;
+    for (let d = 1; d <= 5; d++) {
+      const key = `${d}_${p.num}`;
+      const cell = grid[key];
+      if (cell) {
+        const isLab = cell.subject_type === 'lab';
+        html += `<div class="tt-cell tt-filled ${isLab?'tt-lab-filled':''}">
+          <span class="tt-sub">${cell.subject_code || '??'}</span>
+          <span class="tt-fac">${(cell.faculty_name || '??').split(' ').slice(-1)[0]}</span>
+        </div>`;
+      } else {
+        html += '<div class="tt-cell tt-empty"></div>';
+      }
+    }
+  });
+  document.getElementById('ttGrid').innerHTML = html;
+}
+
+async function submitSelection() {
+  if (!confirm('Are you sure you want to finalize your selection? This will lock your timetable and cannot be undone.')) return;
+  try {
+    const res = await fetch(`${API}/api/submit`, {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({student_id: student.id})
+    });
+    const data = await res.json();
+    if (res.ok) { alert('Selection submitted successfully!'); location.href = 'final_timetable.html'; }
+    else { alert(JSON.stringify(data.detail || data)); }
+  } catch(e) { alert('Error: ' + e.message); }
+}
+
+loadSubjects();
+</script>
+</body>
+</html>
